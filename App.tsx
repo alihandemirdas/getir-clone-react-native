@@ -1,131 +1,307 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  Text,
+  SafeAreaView,
+  StatusBar,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  FlatList,
+  Animated,
 } from 'react-native';
+import {ChevronDownIcon as ChevronDownMicro} from 'react-native-heroicons/micro';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const {width} = Dimensions.get('window');
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const data = [
+  {
+    id: '1',
+    image: 'https://source.unsplash.com/800x400/?grocery',
+    title: 'Çarşı İndirimleri',
+    description: "Ramazana özel indirimler GetirÇarşı'da!",
+  },
+  {
+    id: '2',
+    image: 'https://source.unsplash.com/800x400/?shopping',
+    title: 'Büyük İndirimler',
+    description: 'Sepette ekstra fırsatlar seni bekliyor!',
+  },
+  {
+    id: '3',
+    image: 'https://source.unsplash.com/800x400/?market',
+    title: 'Taze Ürünler',
+    description: 'En taze sebze ve meyveleri kapına getiriyoruz!',
+  },
+  {
+    id: '4',
+    image: 'https://source.unsplash.com/800x400/?grocery',
+    title: 'Çarşı İndirimleri',
+    description: "Ramazana özel indirimler GetirÇarşı'da!",
+  },
+  {
+    id: '5',
+    image: 'https://source.unsplash.com/800x400/?shopping',
+    title: 'Büyük İndirimler',
+    description: 'Sepette ekstra fırsatlar seni bekliyor!',
+  },
+  {
+    id: '6',
+    image: 'https://source.unsplash.com/800x400/?market',
+    title: 'Taze Ürünler',
+    description: 'En taze sebze ve meyveleri kapına getiriyoruz!',
+  },
+  {
+    id: '7',
+    image: 'https://source.unsplash.com/800x400/?market',
+    title: 'Taze Ürünler',
+    description: 'En taze sebze ve meyveleri kapına getiriyoruz!',
+  },
+];
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const data1 = [
+  {id: '1', title: 'getir', image: require('./assets/images/getir-logo.png')},
+  {
+    id: '2',
+    title: 'getirfinans',
+    image: require('./assets/images/finans.png'),
+  },
+  {id: '3', title: 'getiryemek', image: require('./assets/images/yemek.png')},
+  {
+    id: '4',
+    title: 'getiralışveriş',
+    image: require('./assets/images/alisveris.png'),
+  },
+];
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const data2 = [
+  {id: '1', title: 'getirsu', image: require('./assets/images/getirsu.png')},
+  {
+    id: '2',
+    title: 'getiris',
+    image: require('./assets/images/getiris.jpeg'),
+  },
+];
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+const currencyData = [
+  {id: '1', name: 'USD/TRY', rate: '32.45'},
+  {id: '2', name: 'EUR/TRY', rate: '35.20'},
+  {id: '3', name: 'GBP/TRY', rate: '41.10'},
+  {id: '4', name: 'BTC/USD', rate: '68,450'},
+];
+
+const HomePage = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const flatListRef = useRef<any>(null);
+
+  const translateX = useRef(new Animated.Value(width)).current;
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerWidth === 0) return; // Eğer genişlik ölçülmemişse, animasyon başlatma.
+
+    const animate = () => {
+      Animated.timing(translateX, {
+        toValue: -containerWidth, // View'in kendi genişliği kadar kaydır
+        duration: 8000, // 12 saniyede tam geçiş yap
+        useNativeDriver: true,
+      }).start(() => {
+        requestAnimationFrame(() => {
+          translateX.setValue(containerWidth); // Başa al
+          animate(); // Tekrar başlat
+        });
+      });
+    };
+
+    animate();
+  }, [containerWidth]);
+
+  const handleScroll = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / width);
+    setActiveIndex(index);
   };
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
+  const goToSlide = (index: any) => {
+    flatListRef.current.scrollToIndex({index, animated: true});
+  };
 
-  return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
+  const renderItem = ({item}: {item: any}) => (
+    <View className="border-[1px] border-gray-200 shadow-sm rounded-md w-[168px] h-[168px] bg-white">
+      <Text className="absolute font-extrabold tracking-wide text-[#5C3EBC] text-xl top-2 left-2">
+        {item.title}
+      </Text>
+
+      {item.title === 'getirfinans' && (
         <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          onLayout={event => {
+            const {width} = event.nativeEvent.layout;
+            setContainerWidth(width); // View'in genişliğini kaydet
+          }}
+          className="absolute overflow-hidden top-10">
+          <Animated.View
+            style={{flexDirection: 'row', transform: [{translateX}]}}>
+            {currencyData.map(item => (
+              <View
+                key={item.id}
+                style={{flexDirection: 'row', marginRight: 30}}>
+                <Text
+                  className="text-gray-500"
+                  style={{
+                    fontWeight: 'normal',
+                    fontSize: 13,
+                  }}>
+                  {item.name}:{' '}
+                </Text>
+                <Text style={{color: '#FF5556', fontSize: 13}}>
+                  {item.rate}
+                </Text>
+              </View>
+            ))}
+          </Animated.View>
         </View>
-      </ScrollView>
+      )}
+
+      {item.title === 'getiryemek' && (
+        <View className="absolute top-10 left-2 flex flex-row">
+          <Text className="font-semibold text-black text-xs">60.000+</Text>
+          <Text className="font-normal text-black text-xs"> restoran</Text>
+        </View>
+      )}
+
+      {item.title === 'getir' && (
+        <View className="absolute top-9 left-2 flex flex-row">
+          <Text className="font-semibold text-black text-xs">2.000+</Text>
+          <Text className="font-normal text-black text-xs"> ürün</Text>
+        </View>
+      )}
+
+      {item.title === 'getir' && (
+        <Text className="absolute top-12 left-2 font-normal text-black text-xs">
+          dakikalar içinde
+        </Text>
+      )}
+
+      <Image
+        source={item.image}
+        className="absolute w-20 h-20 bottom-2 right-2"
+      />
     </View>
   );
-}
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+  const renderItem2 = ({item}: {item: any}) => (
+    <View className="border-[1px] border-gray-200 shadow-sm rounded-md w-[168px] h-[84px] bg-white">
+      <Text className="absolute font-extrabold tracking-wide text-[#5C3EBC] text-xl top-2 left-2">
+        {item.title}
+      </Text>
 
-export default App;
+      {item.title === 'getirsu' && (
+        <Image
+          source={item.image}
+          className="absolute w-20 h-12 bottom-2 right-2"
+        />
+      )}
+
+      {item.title === 'getiris' && (
+        <Image
+          source={item.image}
+          className="absolute w-20 h-8 bottom-2 right-2"
+        />
+      )}
+    </View>
+  );
+
+  return (
+    <View className="bg-[#f5f5f5] h-screen">
+      <SafeAreaView style={{backgroundColor: '#5C3EBC'}}>
+        <StatusBar barStyle="light-content" backgroundColor="#5C3EBC" />
+      </SafeAreaView>
+      <View className="bg-[#f5f5f5]">
+        {/*** Adres Section ***/}
+        <View>
+          <TouchableOpacity
+            onPress={() => {
+              console.log('Hello World');
+            }}
+            className="flex items-start justify-center p-4 border-[1px] border-gray-100">
+            <View className="flex flex-row items-center">
+              <Text className="text-purple-800 font-bold">Ev, </Text>
+              <Text className="flex-1" numberOfLines={1} ellipsizeMode="tail">
+                Cumhuriyet Mah. Atatürk Bulv. Şahin Apartmanı Kat 4/7 Bor/Niğde
+              </Text>
+              <ChevronDownMicro size={20} color="black" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/*** Hero Section ***/}
+        <View className="items-center">
+          <FlatList
+            ref={flatListRef}
+            data={data}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id}
+            onScroll={handleScroll}
+            renderItem={({item}) => (
+              <View className="relative w-screen items-center mb-2">
+                {/* Resim */}
+                <Image
+                  source={require('./assets/images/herocard.jpg')}
+                  className="w-full h-[200px]"
+                />
+
+                {/* Beyaz İçerik Alanı */}
+                <View className="absolute bottom-[-8px] right-6 w-full">
+                  <Text className="text-base text-right">{item.title}</Text>
+                  <Text className="text-gray-600 text-sm text-right">
+                    {item.description}
+                  </Text>
+                </View>
+              </View>
+            )}
+          />
+
+          {/* Pagination Dots */}
+          <View className="flex-row justify-end self-end mr-5 my-3">
+            {data.map((_, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => goToSlide(index)}
+                className={`w-[7px] h-[7px] rounded-full mx-[4px] ${
+                  activeIndex === index ? 'bg-[#5c3ebc]' : 'bg-gray-400'
+                }`}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/*** App Section ***/}
+        <View className="mt-4 items-center">
+          <FlatList
+            data={data1}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            contentContainerStyle={{rowGap: 14}}
+            columnWrapperStyle={{gap: 14}}
+          />
+        </View>
+
+        {/*** App Section ***/}
+        <View className="mt-4 items-center">
+          <FlatList
+            data={data2}
+            renderItem={renderItem2}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            contentContainerStyle={{rowGap: 14}}
+            columnWrapperStyle={{gap: 14}}
+          />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default HomePage;
