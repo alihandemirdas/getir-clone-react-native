@@ -1,6 +1,6 @@
 # Getir Clone - React Native
 
-![Getir Clone][(https://github.com/alihandemirdas/getir-clone-react-native/blob/main/github-getir.gif)]
+![](https://github.com/alihandemirdas/getir-clone-react-native/github-getir.gif)
 
 ## Proje Açıklaması
 Bu proje, bir bayram günü can sıkıntısından **React Native** kullanılarak geliştirilen **Getir** mobil uygulamasının bir ana sayfa klonudur. Uygulama, kullanıcı dostu bir arayüze ve çeşitli işlevselliklere sahiptir.
